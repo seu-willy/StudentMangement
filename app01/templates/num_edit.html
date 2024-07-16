@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title" style="font-weight: bold">编辑靓号</h2>
+            </div>
+            <div class="panel-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for item in form %}
+                        <div class="form-group">
+                            <label >{{ item.label }}</label>
+                            {{item}}  <!--这里最后一个depart是外键引用的对象，需要在depart类里定义一个str方法，才能打印出值，不然返回的是一个对象-->
+                            <span style="color:red">{{ item.errors.0 }}</span>
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
