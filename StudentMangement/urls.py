@@ -16,12 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from app01.views import depart, user, preetynum, admin, account, task, order, chart, file, city
+from app01.views import depart, user, preetynum, admin, account, task, order, chart, file, city, ceshiredis
 from django.conf import settings
 from django.views.static import serve
 
 urlpatterns = [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}, name='media'),
+
+    path('index/', ceshiredis.index),
     # 部门表
     path('depart/list/', depart.depart_list),
     path('depart/add/', depart.depart_add),

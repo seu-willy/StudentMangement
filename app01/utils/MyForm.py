@@ -39,8 +39,7 @@ class PreetyEditModelForm(BootstrapModelForm):
     def clean_mobile(self):
         id = self.instance.pk  # 你现在实例化的那一行（需要编辑的）的对象的pirmary key
         data = self.cleaned_data['mobile']  # 拿到用户输入的文本
-        exist = models.PreetyNum.objects.exclude(id=id).filter(
-            mobile=data).exists()  # 之所以要exclude，是因为，如果手机号码自己没有修改，只修改了其他属性，上传就会重复
+        exist = models.PreetyNum.objects.exclude(id=id).filter(mobile=data).exists()  # 之所以要exclude，是因为，如果手机号码自己没有修改，只修改了其他属性，上传就会重复
         if exist:
             raise ValidationError("手机号码已存在")
         result = re.match(r'^1[3-9]\d{9}$', data)
@@ -63,6 +62,15 @@ class AdminModelModelForm(BootstrapModelForm):
             'password': forms.PasswordInput(render_value=True)
         }  # 更改原字段属性
 
+    def clean_username(self):
+        user_input = self.cleaned_data.get('username')
+        exists = models.Admin.objects.filter(username=user_input).exists()
+        if exists:
+            raise ValidationError('管理员已存在！')
+        match = re.match(r'^^[A-Z][a-z]*$', user_input)
+        if not match:
+            raise ValidationError('姓名格式有误！')
+        return user_input
     def clean_password(self):
         pwd = self.cleaned_data['password']
         return md5(pwd)
@@ -78,6 +86,15 @@ class AdminEditModelModelForm(BootstrapModelForm):
     class Meta:
         model = models.Admin
         fields = ['username']
+    def clean_username(self):
+        user_input = self.cleaned_data.get('username')
+        exists = models.Admin.objects.filter(username=user_input).exists()
+        if exists:
+            raise ValidationError('管理员已存在！')
+        match = re.match(r'^^[A-Z][a-z]*$', user_input)
+        if not match:
+            raise ValidationError('姓名格式有误！')
+        return user_input
 class AdminResetModelModelForm(BootstrapModelForm):
     confirm_password = forms.CharField(
         label='确认密码',
@@ -93,6 +110,8 @@ class AdminResetModelModelForm(BootstrapModelForm):
     def clean_password(self):
         pwd = self.cleaned_data.get('password')
         md5_pwd = md5(pwd)
+        # print(md5_pwd)
+        # print('self.instance', self.instance, self.instance.password, type(self.instance))  # self.instance Amanda 604444a7262ce663a50d1dfcf5af2c46 <class 'app01.models.Admin'>
         exists = models.Admin.objects.filter(id=self.instance.pk, password=md5_pwd).exists()
         if exists:
             raise ValidationError("密码不能与之前的一致")

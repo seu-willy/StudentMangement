@@ -1,12 +1,9 @@
 from django.shortcuts import render, HttpResponse, redirect
-from django import forms
-from app01.utils.BootstrpForm import BootstrpForm
-from app01.utils.encrypt import md5
 from app01 import models
 from app01.utils.code import check_code
 from io import BytesIO
 from app01.utils.MyForm import LoginForm
-
+from django_redis import get_redis_connection
 
 def login(request):
     '''登录'''
@@ -16,9 +13,13 @@ def login(request):
     form2 = LoginForm(data=request.POST)
     if form2.is_valid():
         code_input = form2.cleaned_data.pop('code')
-        code_image = request.session.get('image')
+        # code_image = request.session.get('image')  # 这里使用session做的
+        # 也可以用redis做
+        coon = get_redis_connection()
+        code_image = coon.get('image').decode('utf-8')
+
         if code_input.upper() != code_image.upper():
-            form2.add_error("code", "验证码错误！")
+            form2.add_error("code", "验证码错误！")  # 手动添加错误信息
             return render(request, "login.html", {'form': form2})
 
         row_object = models.Admin.objects.filter(**form2.cleaned_data).first()  # 本身返回的是一个字典，字典可以作为筛选参数传入
@@ -35,8 +36,13 @@ def login(request):
 def image_code(request):
     '''生成图片验证码'''
     img, code_string = check_code()  # 调用函数生成验证码和图片
-    request.session['image'] = code_string  # 将验证码写入session，方便在登录的地方验证，有点像实例属性，大家都能用
-    request.session.set_expiry(60)  # 给session设置时长，这里是为了避免验证图片一直有效
+    # request.session['image'] = code_string  # 将验证码写入session，方便在登录的地方验证，有点像实例属性，大家都能用
+    # request.session.set_expiry(60)  # 给session设置时长，这里是为了避免验证图片一直有效
+
+    # 这里可以用redis
+    coon = get_redis_connection('default')
+    coon.set('image', code_string, ex=60)
+
     stream = BytesIO()
     img.save(stream, 'png')
 

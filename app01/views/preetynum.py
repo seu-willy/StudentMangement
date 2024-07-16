@@ -51,7 +51,6 @@ def num_add(request):
         form = PreetyNumModelForm()
         return render(request, "num_add.html", {'form': form})
     form2 = PreetyNumModelForm(request.POST)
-
     if form2.is_valid():
         form2.save()
         return redirect('/num/list/')

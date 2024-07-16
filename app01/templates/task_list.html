@@ -14,7 +14,7 @@
                             </div>
                         {% endfor %}
                     </div>
-
+{#                    <input id="btnAdd" type="submit" class="btn btn-primary" style="margin-left: 15px" value="提交">#}
                     <button id="btnAdd" type="submit" class="btn btn-primary" style="margin-left: 15px">提交</button>
 
                 </form>
@@ -144,7 +144,6 @@
                     dataType: "json",  //后端返回的数据格式化为json，前端可以取
                     success: function (res) {
                         if (res.status) {
-                            alert("添加成功")
                             location.reload()
                         } else {
                             {#console.log(res.error)#}

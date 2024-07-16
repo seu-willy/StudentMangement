@@ -32,7 +32,7 @@ def admin_add(request):
     if form2.is_valid():
         form2.save()
         return redirect("/admin/list/")
-    return render(request, "change.html", {'form': form2})
+    return render(request, "change.html", {'form': form2, 'title': title})
 
 def admin_edit(request, nid):
     title = '修改管理员'

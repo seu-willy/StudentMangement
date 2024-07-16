@@ -11,10 +11,16 @@ from app01.utils.MyForm import OrderModelForm
 
 def order_list(request):
     '''订单列表'''
-    queryset = models.Order.objects.all().order_by('-id')
+    filter_dict = {}
+    search_data = request.GET.get('q', '')
+    if search_data:
+        filter_dict['title__contains'] = search_data
+
+    queryset = models.Order.objects.filter(**filter_dict).order_by('-id')
     page_object = Pagination(request, queryset)
     form = OrderModelForm()
     context = {
+        'search_data':search_data,
         'form': form,
         'queryset': page_object.page_queryset,  # 分完页的数据
         'page_str': page_object.html()  # 页码
@@ -27,8 +33,11 @@ def order_add(request):
     '''添加订单（ajax方法）'''
     form = OrderModelForm(request.POST)
     if form.is_valid():
+        # print(form.cleaned_data)
         form.instance.oid = datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(1000, 9999))
+        # print(form.cleaned_data)
         form.instance.user_id = request.session['info'].get('id')
+        # print(form.instance.oid, form.instance.user, form.instance.title, form.instance.price, form.instance.get_status_display() )
         form.save()
         return JsonResponse({'status': True})
     return JsonResponse({'status': False, 'error': form.errors})
